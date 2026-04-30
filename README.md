@@ -2,8 +2,10 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.svg" />
     <source media="(prefers-color-scheme: light)" srcset=".github/assets/logo-light.svg" />
-    <img src=".github/assets/logo-light.svg" alt="CommonFeed" height="60" />
+    <img src=".github/assets/logo-light.svg" alt="CommonFeed" height="48" />
   </picture>
+  <br />
+  <br />
 </p>
 
 <p align="center">An open protocol for algorithmic feeds.</p>
