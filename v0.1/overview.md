@@ -58,10 +58,12 @@ Consumers MUST ignore unrecognized fields, object keys, and enumeration values. 
 
 ## Privacy
 
-- The provider never sees individual user identity. The instance mediates all queries.
-- No browsing history, post identifiers, or user identifiers are sent to providers. Some algorithms accept an aggregated interest vector (see [Queries: Embedding](queries.md#embedding)), but the vector represents aggregate interest and cannot be reversed to identify specific content the user interacted with.
-- Providers MUST NOT store interest vectors beyond the lifetime of the request.
-- Providers track instance-level usage only.
+- Request payloads carry no user identifiers, browsing history, or session data.
+- Authentication is at the consumer level (one API key per consumer).
+- Providers MUST NOT retain interest vectors (`embedding` field) beyond the lifetime of the request.
+- Providers track usage at the consumer level only.
+
+Anonymity properties scale with the consumer's user base. Multi-user consumers hide individual users in the consumer's traffic; single-user consumers reveal one user's query patterns to the provider through network metadata, though the wire payload remains identifier-free.
 
 ## Versioning
 

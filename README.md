@@ -10,7 +10,7 @@
 
 <p align="center">An open protocol for algorithmic feeds.</p>
 
-CommonFeed is a JSON-over-HTTPS protocol with two roles: a provider computes and ranks content, and a consumer queries the provider and renders the results. The consumer mediates every request, so the provider never sees individual users. The protocol is forward-compatible by design. Unknown fields are ignored, so the spec can evolve without breaking deployments.
+CommonFeed is a JSON-over-HTTPS protocol for serving algorithmic feeds. Providers compute and rank content; consumers (servers, native clients, or web apps) query the provider and render the results. Requests carry no user identifiers.
 
 ## Status
 
@@ -35,10 +35,9 @@ Reference implementation: [fediway/feeds](https://github.com/fediway/feeds).
 
 ## Privacy
 
-- Providers never see individual users. Consumers mediate every query.
-- No browsing history, post identifiers, or user identifiers are sent to providers.
-- When an algorithm accepts an aggregated interest vector, the vector does not reveal which specific content a user interacted with, and providers MUST NOT retain it beyond the request.
-- Providers track usage at the consumer level only.
+Request payloads carry no user identifiers, browsing history, or session data. Authentication is at the consumer level. Providers MUST NOT retain interest vectors beyond the request.
+
+Anonymity properties scale with the consumer: multi-user consumers (e.g. fediverse servers) hide individual users in the consumer's traffic; single-user consumers (e.g. native clients) do not.
 
 ## Versioning
 
