@@ -150,8 +150,7 @@ Response (see [Responses](responses.md) for envelope, [Posts](posts.md) for item
         "likes": 89,
         "reposts": 23,
         "replies": 7
-      },
-      "score": 0.847
+      }
     }
   ],
   "algorithm": "commonfeed-recommended-v1",

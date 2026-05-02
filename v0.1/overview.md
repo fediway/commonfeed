@@ -65,6 +65,10 @@ Consumers MUST ignore unrecognized fields, object keys, and enumeration values. 
 
 Anonymity properties scale with the consumer's user base. Multi-user consumers hide individual users in the consumer's traffic; single-user consumers reveal one user's query patterns to the provider through network metadata, though the wire payload remains identifier-free.
 
+## Composition
+
+Consumers MAY query multiple providers and merge results into a single feed. The merging strategy is a consumer concern. The `identifiers` field on result items (see [Posts](posts.md#protocol-identifier-formats)) enables deduplication of items returned by more than one provider. Consumers SHOULD cache responses to limit fan-out load on providers.
+
 ## Versioning
 
 Two versions are independent:

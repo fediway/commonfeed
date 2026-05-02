@@ -10,7 +10,7 @@
 
 <p align="center">An open protocol for algorithmic feeds.</p>
 
-CommonFeed is a JSON-over-HTTPS protocol for serving algorithmic feeds. Providers compute and rank content; consumers (servers, native clients, or web apps) query the provider and render the results. Requests carry no user identifiers.
+CommonFeed is a JSON-over-HTTPS protocol for algorithmic feeds. Providers compute and rank content; consumers (servers, native clients, or web apps) query one or more providers and assemble the feed they show users. Requests carry no user identifiers.
 
 ## Status
 

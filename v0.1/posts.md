@@ -25,7 +25,6 @@ Result items for `posts` resources. Each item represents a piece of content from
 | `quote` | PostItem | No | The quoted post, inline as a full PostItem (absent if not a quote post, see [Quoted Posts](#quoted-posts)) |
 | `tags` | Array | No | Hashtags used in the content (absent if none, see below) |
 | `emojis` | Array | No | Custom emojis used in the content (absent if none, see below) |
-| `score` | Float | No | Relevance score in `[0, 1]`, normalized by the provider; higher means more relevant |
 | `context` | String | No | Opaque per-item context token. When present, consumers SHOULD pass this value back to the provider with engagement signals for the item. Providers use this for feedback loops (e.g. closing the loop between recommendation and observed engagement). Consumers MUST NOT interpret, parse, or make decisions based on the contents of this field |
 
 Engagement counts are approximate and may be stale. Consumers SHOULD NOT treat them as authoritative.
@@ -41,6 +40,8 @@ Engagement counts are approximate and may be stale. Consumers SHOULD NOT treat t
 | `nostr` | `nostr:<64-char lowercase hex event ID>` | `nostr:<64-char lowercase hex pubkey>` |
 
 Providers MAY include identifiers from multiple protocols on the same item when content has been ingested via bridged copies (e.g. a Bluesky post bridged via Bridgy Fed will have both `atproto` and `activitypub` keys).
+
+Because identifiers are protocol-canonical, consumers querying multiple providers MAY use them to deduplicate items returned by more than one.
 
 <details>
 <summary>Example</summary>
@@ -157,8 +158,7 @@ Providers MAY include identifiers from multiple protocols on the same item when 
     "likes": 142,
     "reposts": 38,
     "replies": 12
-  },
-  "score": 0.904
+  }
 }
 ```
 
@@ -266,7 +266,6 @@ The parent PostItem follows the standard PostItem schema with the following cons
 - `id`: MAY be absent
 - `replyTo`: always absent (no recursive nesting; max depth is 1)
 - `quote`: always absent
-- `score`: always absent
 - `context`: always absent
 
 If the parent post is unavailable (deleted, not yet resolved), providers MUST omit `replyTo` entirely rather than serving partial data.
@@ -282,7 +281,6 @@ The quoted PostItem follows the standard PostItem schema with the following cons
 - `id`: MAY be absent
 - `quote`: always absent (no recursive nesting; max depth is 1)
 - `replyTo`: always absent
-- `score`: always absent
 - `context`: always absent
 
 If the quoted post is unavailable (deleted, not yet resolved), providers MUST omit `quote` entirely rather than serving partial data.

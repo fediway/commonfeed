@@ -22,9 +22,8 @@ Result items for `links` resources. Each item represents a link with preview met
 | `favicon` | ImageObject | No | Site favicon (see [ImageObject](posts.md#imageobject)) |
 | `postCount` | Integer | Yes | Total posts sharing this link in the time window |
 | `accountCount` | Integer | Yes | Unique authors sharing this link in the time window |
-| `score` | Float | No | Relevance score in `[0, 1]`, normalized by the provider; higher means more relevant |
 
-The link metadata fields (`url` through `publishedAt`) are the same shape as the [Link Object](posts.md#link-object) on post results. The Link Result adds usage statistics (`postCount`, `accountCount`, `score`).
+The link metadata fields (`url` through `publishedAt`) are the same shape as the [Link Object](posts.md#link-object) on post results. The Link Result adds usage statistics (`postCount`, `accountCount`).
 
 <details>
 <summary>Example</summary>
@@ -69,8 +68,7 @@ The link metadata fields (`url` through `publishedAt`) are the same shape as the
   "language": "en",
   "publishedAt": "2026-02-27T10:00:00Z",
   "postCount": 42,
-  "accountCount": 15,
-  "score": 0.85
+  "accountCount": 15
 }
 ```
 
