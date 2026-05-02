@@ -16,7 +16,9 @@ CommonFeed is a JSON-over-HTTPS protocol for serving algorithmic feeds. Provider
 
 v0.1 (prototype). Breaking changes are expected before v1.0.
 
-Reference implementation: [fediway/feeds](https://github.com/fediway/feeds).
+Reference implementations:
+- Provider: [fediway/feeds](https://github.com/fediway/feeds)
+- Client: [fediway/fediway](https://github.com/fediway/fediway)
 
 ## Specification
 
