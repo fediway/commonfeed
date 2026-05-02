@@ -14,12 +14,7 @@ Example capability entry:
   "model": "Qwen/Qwen3-Embedding-0.6B",
   "dims": 1024,
   "params": {
-    "alpha": {
-      "like": 0.05,
-      "repost": 0.075,
-      "reply": 0.15,
-      "bookmark": 0.10
-    }
+    "alpha": 0.05
   }
 }
 ```
@@ -28,15 +23,47 @@ Example capability entry:
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
-| `alpha` | Object | Yes | Per-event-kind EMA learning rates. Required keys: `like`, `repost`, `reply`, `bookmark`. Each value MUST be a number in `[0, 1]` |
+| `alpha` | Number | Yes | Base EMA learning rate. MUST be in `[0, 1]`. |
 
-`alpha[k]` is the weight given to a new event of kind `k` in the EMA update; `1 − alpha[k]` is the weight retained from prior state. Setting `alpha[k] = 0` causes events of that kind to have no effect on the user vector. Setting `alpha[k] = 1` causes events of that kind to replace prior state entirely.
+`alpha` is the provider-declared base decay rate. Each engagement event is scaled by a per-kind weight chosen by the consumer; the effective learning rate for a kind `k` is `α_eff[k] = clamp(alpha × weight[k], 0, 1)`. Setting `α_eff[k] = 0` causes events of kind `k` to have no effect on the user vector; setting `α_eff[k] = 1` causes them to replace prior state entirely.
 
-The provider advertises `alpha` in the capability entry's `params` object. Consumers MUST use exactly the values declared by the provider. Two providers advertising `ema0.1` with different `alpha` values will produce different vectors from the same behavior.
+Consumers MUST use the `alpha` value declared by the provider. Two providers advertising `ema0.1` with different `alpha` values will produce different decay characteristics from the same behavior; that is the provider's tuning.
+
+## Engagement scaling
+
+Engagement types and their relative weights are consumer-side concerns. A consumer applies whichever engagement primitives its host protocol surfaces, and SHOULD scale `alpha` per type so that stronger signals (typically those requiring more user effort or expressing more intent) drive larger updates than weaker ones.
+
+`ema0.1` does not enumerate engagement types. Different consumers run on different protocols (ActivityPub, AT Protocol, Nostr, etc.) with different engagement primitives; a consumer's engagement vocabulary is its own to define.
+
+The provider never observes individual engagement events. All events are applied consumer-side from the consumer's local state; the provider only sees the resulting unit vector.
+
+### Example weight set
+
+For a consumer exposing a Mastodon-style engagement vocabulary, a reasonable baseline:
+
+| Kind | Recommended weight | Notes |
+|------|---------------------|-------|
+| `like` | 0.5 | Low effort, noisy positive signal. |
+| `repost` | 1.0 | Public amplification. |
+| `reply` | 1.5 | Writing effort and topical commentary. |
+| `quote` | 2.0 | Public commentary with explicit reference to the source. |
+| `bookmark` | 2.5 | Private intent ("I want to revisit this"); no social-performance overlay. |
+
+With these weights and `alpha = 0.05`, effective alphas are:
+
+| Kind | `α_eff` |
+|------|---------|
+| `like` | 0.025 |
+| `repost` | 0.050 |
+| `reply` | 0.075 |
+| `quote` | 0.100 |
+| `bookmark` | 0.125 |
+
+Consumers SHOULD adapt these to their own engagement vocabulary and user base. The recommended values are guidance, not requirement.
 
 ## Encoder
 
-The consumer encodes each engaged post into a unit vector using the model declared in the capability entry. The text fed to the model is, in order, whatever of the following is present: author display name and handle, content warning, post title, post summary, post body, image alt text, hashtags. Fields that are absent are skipped. The exact template used by the reference implementation is at [`fediway/feeds/workers/orbit/templates/embedding.j2`](https://github.com/fediway/feeds/blob/main/workers/orbit/templates/embedding.j2).
+The consumer encodes each engaged post into a unit vector using the model declared in the capability entry. When an engagement event represents a response to another post (e.g., reply, quote), the engaged post is the post being responded to, not the post the user authored. The text fed to the model is, in order, whatever of the following is present: author display name and handle, content warning, post title, post summary, post body, image alt text, hashtags. Fields that are absent are skipped. The exact template used by the reference implementation is at [`fediway/feeds/workers/orbit/templates/embedding.j2`](https://github.com/fediway/feeds/blob/main/workers/orbit/templates/embedding.j2).
 
 The model's output is L2-normalized before aggregation.
 
@@ -69,10 +96,11 @@ Sections are separated by a single blank line; absent fields are skipped along w
 For each engagement event in chronological order:
 
 ```
-new = normalize(α[k] · post_embedding + (1 − α[k]) · current)
+α_eff[k] = clamp(alpha · weight[k], 0, 1)
+new = normalize(α_eff[k] · post_embedding + (1 − α_eff[k]) · current)
 ```
 
-where `current` is the user's vector before the event, `post_embedding` is the unit-normalized post embedding, `k` is the event kind, and `α[k]` is the value of `params.alpha[k]`. The result is L2-normalized after every step. The user vector sent in the request is the value of `current` after applying all events.
+where `current` is the user's vector before the event, `post_embedding` is the unit-normalized post embedding, `k` is the event kind, `alpha` is the provider-declared base rate from `params.alpha`, and `weight[k]` is the consumer-chosen per-kind weight. The result is L2-normalized after every step. The user vector sent in the request is the value of `current` after applying all events.
 
 ## Cold start
 
