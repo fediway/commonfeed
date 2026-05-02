@@ -80,20 +80,22 @@ The embedding is a top-level request field, not a filter or parameter. It carrie
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `embedding.vector` | Float[] | Yes | Interest vector. MUST be unit-normalized (L2 norm ≈ 1.0) |
-| `embedding.model` | String | Yes | Model identifier. MUST match a `name` from the capability's `embedding.models` array |
+| `embedding.method` | String | Yes | Method identifier. MUST match a `name` from the capability's `embedding.methods` array |
+| `embedding.model` | String | Conditional | Model identifier. Required when the matched method entry declares a `model`; MUST be omitted otherwise. When present, MUST match the entry's `model` |
 
 ### Validation
 
 Providers MUST validate the embedding and return `422 invalid_params` with a descriptive `param` and `message` if validation fails:
 
 - **Missing required embedding**: if the capability declares `embedding.required: true` and the request omits `embedding`, return `422` with `param: "embedding"`.
-- **Unknown model**: if `embedding.model` does not match any model in the capability's `embedding.models` array, return `422` with `param: "embedding.model"`. The error message SHOULD list the supported model names.
-- **Wrong dimensions**: if `embedding.vector` length does not equal the model's `dims`, return `422` with `param: "embedding.vector"`. The error message SHOULD include the actual and expected dimensions.
+- **Unknown method**: if `embedding.method` does not match any `name` in the capability's `embedding.methods` array, return `422` with `param: "embedding.method"`. The error message SHOULD list the supported method identifiers.
+- **Model mismatch**: if the matched method entry declares a `model` and the request's `embedding.model` is missing or does not match, return `422` with `param: "embedding.model"`. If the matched method entry has no `model` and the request includes `embedding.model`, return `422` with `param: "embedding.model"`.
+- **Wrong dimensions**: if `embedding.vector` length does not equal the matched entry's `dims`, return `422` with `param: "embedding.vector"`. The error message SHOULD include the actual and expected dimensions.
 - **Zero vector**: if all elements of `embedding.vector` are zero, return `422` with `param: "embedding.vector"`. A zero vector has no direction and cannot produce meaningful similarity rankings.
 
 ### Privacy
 
-The embedding is an aggregated interest signal, not browsing history. It does not contain identifiers for individual posts or authors. Consumers compute the vector locally from user behavior and send only the resulting vector. Providers cannot reconstruct which specific content a user interacted with from the vector alone.
+The embedding is an aggregated interest signal, not browsing history. It does not contain identifiers for individual posts or authors. Consumers compute the vector locally by following the method declared in the capability (see [embedding methods](../guidelines/embeddings/)) and send only the resulting vector. Providers cannot reconstruct which specific content a user interacted with from the vector alone.
 
 Consumers SHOULD rotate or perturb vectors periodically to limit long-term profiling. Providers MUST NOT store embeddings beyond the lifetime of the request.
 
@@ -111,8 +113,9 @@ Authorization: Bearer cf_live_abc123xyz
 ```json
 {
   "embedding": {
-    "vector": [0.023, -0.041, 0.019, "... 256 floats total ..."],
-    "model": "qwen3_256d"
+    "vector": [0.023, -0.041, 0.019, "... 1024 floats total ..."],
+    "method": "ema0.1",
+    "model": "Qwen/Qwen3-Embedding-0.6B"
   },
   "filters": {
     "language": ["en", "de"]
