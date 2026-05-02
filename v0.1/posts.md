@@ -158,8 +158,7 @@ Because identifiers are protocol-canonical, consumers querying multiple provider
     "likes": 142,
     "reposts": 38,
     "replies": 12
-  },
-  "score": 0.904
+  }
 }
 ```
 
@@ -267,7 +266,6 @@ The parent PostItem follows the standard PostItem schema with the following cons
 - `id`: MAY be absent
 - `replyTo`: always absent (no recursive nesting; max depth is 1)
 - `quote`: always absent
-- `score`: always absent
 - `context`: always absent
 
 If the parent post is unavailable (deleted, not yet resolved), providers MUST omit `replyTo` entirely rather than serving partial data.
@@ -283,7 +281,6 @@ The quoted PostItem follows the standard PostItem schema with the following cons
 - `id`: MAY be absent
 - `quote`: always absent (no recursive nesting; max depth is 1)
 - `replyTo`: always absent
-- `score`: always absent
 - `context`: always absent
 
 If the quoted post is unavailable (deleted, not yet resolved), providers MUST omit `quote` entirely rather than serving partial data.

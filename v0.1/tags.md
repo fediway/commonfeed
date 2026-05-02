@@ -12,8 +12,7 @@ Result items for `tags` resources. Each item represents a hashtag with usage sta
   "history": [
     { "day": "1709251200", "uses": 30, "accounts": 12 },
     { "day": "1709164800", "uses": 25, "accounts": 10 }
-  ],
-  "score": 0.92
+  ]
 }
 ```
 
