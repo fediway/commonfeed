@@ -110,7 +110,7 @@ Returns posts that quote the specified post.
 | `pagination.cursorExpiresAt` | String | No | ISO 8601 expiry time for the cursor |
 | `pagination.hasMore` | Boolean | Yes | Whether more results exist |
 
-There is no `algorithm` field; these endpoints use provider-default ordering. The `score` field is absent on result items since no algorithmic ranking was applied.
+There is no `algorithm` field; these endpoints use provider-default ordering.
 
 <details>
 <summary>Example</summary>

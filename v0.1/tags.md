@@ -28,4 +28,3 @@ Result items for `tags` resources. Each item represents a hashtag with usage sta
 | `history[].day` | String | Yes | Unix timestamp of the start of the day (UTC), encoded as a string for compatibility with Mastodon's trends API |
 | `history[].uses` | Integer | Yes | Posts using this tag on that day |
 | `history[].accounts` | Integer | Yes | Unique authors on that day |
-| `score` | Float | No | Relevance score in `[0, 1]`, normalized by the provider; higher means more relevant |
