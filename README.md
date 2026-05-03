@@ -34,6 +34,7 @@ Reference implementations:
 | [Tags](v0.1/tags.md) | Tag result items |
 | [Links](v0.1/links.md) | Link result items |
 | [Errors](v0.1/errors.md) | Error codes and rate limit headers |
+| [Embedding methods](guidelines/embeddings/) | Documented aggregation methods referenced by capability identifiers |
 
 ## Privacy
 

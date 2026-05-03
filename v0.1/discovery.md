@@ -74,8 +74,20 @@ When `lookups` is present, lookup and relationship endpoints are also available.
       "multiValue": ["language"],
       "embedding": {
         "required": true,
-        "models": [
-          { "name": "qwen3_256d", "dims": 256 }
+        "methods": [
+          {
+            "name": "ema0.1",
+            "model": "Qwen/Qwen3-Embedding-0.6B",
+            "dims": 1024,
+            "params": {
+              "alpha": {
+                "like": 0.05,
+                "repost": 0.075,
+                "reply": 0.15,
+                "bookmark": 0.10
+              }
+            }
+          }
         ]
       }
     },
@@ -125,15 +137,19 @@ When `lookups` is present, lookup and relationship endpoints are also available.
 
 Capabilities MAY include an `embedding` field to advertise support for embedding-based ranking. When present, the algorithm accepts an interest vector as a query signal (see [Queries: Embedding](queries.md#embedding)). When absent, the algorithm does not accept embeddings.
 
-The `embedding` object tells consumers which models the provider accepts, so they can compute a compatible vector before querying.
+The capability defines what embeddings the provider accepts. Each entry names a method and, when the method needs one, a model. The method fixes how per-event embeddings are aggregated into the user vector; the model (when present) fixes the embedding space. Methods MAY require additional parameters; these are advertised in `params` and applied by the consumer when computing the vector.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `embedding.required` | Boolean | Yes | Whether the embedding MUST be provided. If `true`, requests without an embedding return `422` |
-| `embedding.models` | Array | Yes | Accepted embedding models. At least one |
-| `embedding.models[].name` | String | Yes | Model identifier. Consumers use this to select and label their vectors |
-| `embedding.models[].dims` | Integer | Yes | Expected vector dimensionality. Vectors with a different length are rejected |
+| `embedding.methods` | Array | Yes | Accepted methods. At least one |
+| `embedding.methods[].name` | String | Yes | Method identifier (e.g. `ema0.1`). See [embedding methods](../guidelines/embeddings/) for documented methods |
+| `embedding.methods[].model` | String | Conditional | Model identifier. Required when the method depends on an external embedding model; omitted when the method is self-contained |
+| `embedding.methods[].dims` | Integer | Yes | Expected vector dimensionality. Vectors with a different length are rejected |
+| `embedding.methods[].params` | Object | Conditional | Method-defined parameters required to reproduce the vector. Required keys, types, and value ranges are defined by the method. Omitted when the method takes no parameters |
+
+Consumers MUST follow the method declared by the provider, including any `params` values. Two consumers querying the same provider with the same `(name, model, params)` triple MUST produce the same vector from the same user behavior. Running a different aggregation, a different model, or different parameter values breaks comparability across consumers.
 
 A capability with `embedding.required: true` cannot return meaningful results without a vector; the embedding is the primary query signal. A capability with `embedding.required: false` uses the embedding as an optional ranking boost alongside other signals.
 
-When a provider supports multiple models, consumers SHOULD prefer the first model in the array. Providers SHOULD order models by preference (recommended first).
+When a provider lists multiple methods, consumers SHOULD prefer the first entry in the array. Providers SHOULD order entries by preference (recommended first).
