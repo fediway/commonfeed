@@ -63,9 +63,26 @@ Providers and consumers SHOULD use the following well-known filter names where a
 | `language` | String / String[] | ISO 639-1 language codes |
 | `contentType` | String / String[] | `post`, `article`, `reply` |
 | `hasMedia` | Boolean | Filter to posts with media attachments |
+| `mediaType` | String / String[] | `image`, `loop`, `landscapeVideo`, `verticalVideo`, `audio` (see [Media types](#media-types)) |
 | `protocol` | String / String[] | `activitypub`, `atproto`, `nostr` |
 | `tag` | String / String[] | Hashtag names (lowercase, no `#` prefix). Returns content matching **any** of the provided tags (OR semantics). Accepts multiple values only if `"tag"` is listed in the capability's `multiValue` array (see [Discovery](discovery.md)); otherwise a single value only |
 | `link` | String | URL of a link. Returns content that references this link |
+
+### Media types
+
+A `mediaType` value identifies a post by the consumption surface it is rendered in, not by file format. The aim is to let consumers select posts that fit a specific consumption surface. A value earns inclusion only when its consumption surface requires a distinct renderer rather than a parameter on an existing one. Future versions may introduce additional values under the same criterion.
+
+| Value | Definition |
+|-------|------------|
+| `image` | Still image, single or gallery. Any aspect ratio |
+| `loop` | Short animation that auto-plays muted and loops. File format is irrelevant: animated GIFs served as MP4, Mastodon `gifv`, and animated stickers all classify as `loop` |
+| `landscapeVideo` | Video wider than tall, finite duration, audio-on by default |
+| `verticalVideo` | Video taller than wide, finite duration, audio-on by default |
+| `audio` | Sound-only content such as podcasts or music |
+
+`mediaType` is a post-level classification derived from media metadata. It is distinct from the per-attachment `type` on the [Media Object](posts.md#media-object), which classifies each attachment's file kind (`image`, `video`, `audio`) rather than the post's consumption surface.
+
+A post with mixed attachments classifies by its dominant attachment. Square video and other edge orientation cases are provider-defined. Posts without media match no `mediaType` value.
 
 Providers MAY define additional custom filters beyond this list. Custom filters MUST be declared in the capability's discovery entry.
 

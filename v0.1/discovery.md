@@ -55,8 +55,8 @@ When `lookups` is present, lookup and relationship endpoints are also available.
       "algorithm": "trending",
       "description": "Trending content by engagement velocity",
       "params": ["window"],
-      "filters": ["language", "protocol", "tag"],
-      "multiValue": ["language", "tag"]
+      "filters": ["language", "protocol", "tag", "mediaType"],
+      "multiValue": ["language", "tag", "mediaType"]
     },
     {
       "resource": "posts",
